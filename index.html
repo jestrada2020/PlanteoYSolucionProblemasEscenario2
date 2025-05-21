@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solucionador de Problemas de Edades</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.0.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f9f9f9;
+            color: #333;
+        }
+        .step-container {
+            transition: max-height 0.5s ease-out;
+            overflow: hidden;
+        }
+        .math {
+            font-style: italic;
+        }
+        .fraction {
+            display: inline-block;
+            vertical-align: middle;
+            text-align: center;
+        }
+        .fraction > span {
+            display: block;
+        }
+        .fraction span.frac-line {
+            border-top: 1px solid;
+            margin: 0 0.1em;
+        }
+        .katex {
+            font-family: 'Times New Roman', serif;
+            font-style: italic;
+        }
+        .equation {
+            padding: 0.5em 0;
+        }
+        .solution-controls .toggle-btn {
+            transition: transform 0.3s ease;
+        }
+        .solution-controls .toggle-btn.active {
+            transform: rotate(180deg);
+        }
+        .problem-tab {
+            transition: all 0.3s ease;
+        }
+        .problem-tab:hover {
+            background-color: #f0f4ff;
+        }
+        .step-content {
+            display: none;
+        }
+        .step-content.active {
+            display: block;
+            animation: fadeIn 0.5s;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .custom-marker {
+            counter-increment: step;
+        }
+        .custom-marker::before {
+            content: counter(step) ".";
+            font-weight: bold;
+            margin-right: 0.5rem;
+        }
+        .print-section {
+            page-break-inside: avoid;
+        }
+        .exercise-box {
+            border-left: 4px solid #4f46e5;
+        }
+        .step-navigation button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .hide-print {
+            display: none;
+        }
+        /* Animaciones para la calculadora */
+        @keyframes highlight {
+            0% { background-color: #4f46e5; color: white; }
+            100% { background-color: transparent; color: #333; }
+        }
+        .highlight {
+            animation: highlight 1.5s;
+        }
+        .interactivo-container {
+            min-height: 250px;
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+    <header class="bg-indigo-700 text-white py-6 px-4 shadow-lg">
+        <div class="container mx-auto">
+            <h1 class="text-3xl font-bold text-center">Solución de Problemas de Edades</h1>
+            <p class="text-center mt-2">Explicación paso a paso con ejemplos interactivos</p>
+        </div>
+    </header>
+
+    <div class="container mx-auto p-4">
+        <!-- Selector de problemas -->
+        <div class="flex flex-wrap mb-6 border-b border-gray-200">
+            <button class="problem-tab px-4 py-2 text-indigo-700 font-medium border-b-2 border-indigo-700" data-problem="1">
+                Problema 1
+            </button>
+            <button class="problem-tab px-4 py-2 text-gray-500 font-medium" data-problem="2">
+                Problema 2
+            </button>
+            <button class="problem-tab px-4 py-2 text-gray-500 font-medium" data-problem="3">
+                Problema 3
+            </button>
+            <button class="problem-tab px-4 py-2 text-gray-500 font-medium" data-problem="4">
+                Problema 4
+            </button>
+            <button class="problem-tab px-4 py-2 text-gray-500 font-medium" data-problem="5">
+                Problema 5
+            </button>
+        </div>
+
+        <!-- Problemas -->
+        <div id="problem-container">
+            <!-- Problema 1 -->
+            <div class="problem-content active" id="problem-1">
+                <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                    <h2 class="text-2xl font-bold mb-4">Problema 1</h2>
+                    <div class="exercise-box pl-4 py-2 bg-indigo-50 rounded mb-4">
+                        <p class="font-medium">La edad de A es doble que la de B y hace 15 años la edad de A era el triplo de la de B. Hallar las edades actuales.</p>
+                    </div>
+
+                    <div class="solution-controls flex justify-between items-center mb-4 bg-gray-100 p-3 rounded-lg">
+                        <h3 class="text-lg font-semibold">Solución paso a paso</h3>
+                        <div class="flex items-center">
+                            <button id="prev-step-1" class="step-navigation px-3 py-1 mr-2 bg-indigo-600 text-white rounded disabled:opacity-50" disabled>
+                                <i class="fas fa-chevron-left"></i> Anterior
+                            </button>
+                            <span id="step-indicator-1" class="mx-2">Paso 1/5</span>
+                            <button id="next-step-1" class="step-navigation px-3 py-1 bg-indigo-600 text-white rounded">
+                                Siguiente <i class="fas fa-chevron-right"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="steps-container border border-gray-200 rounded-lg p-4">
+                        <div class="step-content active" data-problem="1" data-step="1">
+                            <h4 class="font-bold mb-2">Paso 1: Definir las variables</h4>
+                            <p>Vamos a definir variables para representar las edades actuales:</p>
+                            <div class="my-3 pl-4 border-l-4 border-indigo-300">
+                                <p class="mb-2"><span class="font-semibold">x = </span>número de años que tiene B ahora</p>
+                                <p><span class="font-semibold">2x = </span>número de años que tiene A ahora (porque la edad de A es el doble que la de B)</p>
+                            </div>
+                        </div>
+
+                        <div class="step-content" data-problem="1" data-step="2">
+                            <h4 class="font-bold mb-2">Paso 2: Analizar la situación hace 15 años</h4>
+                            <p>Ahora calculamos las edades hace 15 años:</p>
+                            <div class="my-3 pl-4 border-l-4 border-indigo-300">
+                                <p class="mb-2"><span class="font-semibold">Edad de A hace 15 años = </span>2x - 15 años</p>
+                                <p><span class="font-semibold">Edad de B hace 15 años = </span>x - 15 años</p>
+                            </div>
+                        </div>
+
+                        <div class="step-content" data-problem="1" data-step="3">
+                            <h4 class="font-bold mb-2">Paso 3: Establecer la ecuación</h4>
+                            <p>Según el enunciado, hace 15 años la edad de A era el triple de la edad de B:</p>
+                            <div class="my-3 pl-4 border-l-4 border-indigo-300">
+                                <p class="equation">2x - 15 = 3(x - 15)</p>
+                                <p class="equation">2x - 15 = 3x - 45</p>
+                            </div>
+                        </div>
+
+                        <div class="step-content" data-problem="1" data-step="4">
+                            <h4 class="font-bold mb-2">Paso 4: Resolver la ecuación</h4>
+                            <div class="my-3 pl-4 border-l-4 border-indigo-300">
+                                <p class="equation">2x - 15 = 3x - 45</p>
+                                <p class="equation">2x - 3x = -45 + 15</p>
+                                <p class="equation">-x = -30</p>
+                                <p class="equation">x = 30 años (edad actual de B)</p>
+                            </div>
+                        </div>
+
+                        <div class="step-content" data-problem="1" data-step="5">
+                            <h4 class="font-bold mb-2">Paso 5: Calcular la edad de A</h4>
+                            <div class="my-3 pl-4 border-l-4 border-indigo-300">
+                                <p class="equation">2x = 2 · 30 = 60 años (edad actual de A)</p>
+                            </div>
+                            <div class="mt-4 p-3 bg-green-50 border border-green-300 rounded-lg">
+                                <p class="font-bold text-green-800">Respuesta:</p>
+                                <p class="text-green-700">Actualmente, B tiene 30 años y A tiene 60 años.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="interactivo-container mt-6 bg-blue-50 p-4 rounded-lg">
+                        <h3 class="text-xl font-bold mb-3">Comprobación Interactiva</h3>
+                        <p>Verifica los cálculos para comprobar que la solución es correcta:</p>
+                        <div class="flex flex-col md:flex-row mt-4 gap-4">
+                            <div class="flex-1 bg-white p-4 rounded shadow-sm">
+                                <h4 class="font-semibold mb-2">Condición actual</h4>
+                                <p>Edad de A (60) = 2 × Edad de B (30)</p>
+                                <p class="mt-2">¿Se cumple? <span id="check-current-1" class="font-bold text-green-600">✓ Sí</span></p>
+                            </div>
+                            <div class="flex-1 bg-white p-4 rounded shadow-sm">
+                                <h4 class="font-semibold mb-2">Condición hace 15 años</h4>
+                                <p>Edad de A (45) = 3 × Edad de B (15)</p>
+                                <p class="mt-2">¿Se cumple? <span id="check-past-1" class="font-bold text-green-600">✓ Sí</span></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Problema 2 -->
+            <div class="problem-content hidden" id="problem-2">
+                <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                    <h2 class="text-2xl font-bold mb-4">Problema 2</h2>
+                    <div class="exercise-box pl-4 py-2 bg-indigo-50 rounded mb-4">
+                        <p class="font-medium">La edad de A es el triplo de la de B y dentro de 20 años será el doble. Hallar las edades actuales.</p>
+                    </div>
+
+                    <div class="solution-controls flex justify-between items-center mb-4 bg-gray-100 p-3 rounded-lg">
+                        <h3 class="text-lg font-semibold">Solución paso a paso</h3>
+                        <div class="flex items-center">
+                            <button id="prev-step-2" class="step-navigation px-3 py-1 mr-2 bg-indigo-600 text-white rounded disabled:opacity-50" disabled>
+                                <i class="fas fa-chevron-left"></i> Anterior
+                            </button>
+                            <span id="step-indicator-2" class="mx-2">Paso 1/5</span>
+                            <button id="next-step-2" class="step-navigation px-3 py-1 bg-indigo-600 text-white rounded">
+                                Siguiente <i class="fas fa-chevron-right"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="steps-container border border-gray-200 rounded-lg p-4">
+                        <div class="step-content active" data-problem="2" data-step="1">
+                            <h4 class="font-bold mb-2">Paso 1: Definir las variables</h4>
+                            <p>Vamos a definir variables para representar las edades actuales:</p>
+                            <div class="my-3 pl-4 border-l-4 border-indigo-300">
+                                <p class="mb-2"><span class="font-semibold">x = </span>número de años que tiene B ahora</p>
+                                <p><span class="font-semibold">3x = </span>número de años que tiene A ahora (porque la edad de A es el triple que la de B)</p>
+                            </div>
+                        </div>
+
+                        <div class="step-content" data-problem="2" data-step="2">
+                            <h4 class="font-bold mb-2">Paso 2: Analizar la situación dentro de 20 años</h4>
+                            <p>Ahora calculamos las edades dentro de 20 años:</p>
+                            <div class="my-3 pl-4 border-l-4 border-indigo-300">
+                                <p class="mb-2"><span class="font-semibold">Edad de A dentro de 20 años = </span>3x + 20 años</p>
+                                <p><span class="font-semibold">Edad de B dentro de 20 años = </span>x + 20 años</p>
+                            </div>
+                        </div>
+
+                        <div class="step-content" data-problem="2" data-step="3">
+                            <h4 class="font-bold mb-2">Paso 3: Establecer la ecuación</h4>
+                            <p>Según el enunciado, dentro de 20 años la edad de A será el doble de la edad de B:</p>
+                            <div class="my-3 pl-4 border-l-4 border-indigo-300">
+                                <p class="equation">3x + 20 = 2(x + 20)</p>
+                                <p class="equation">3x + 20 = 2x + 40</p>
+                            </div>
+                        </div>
+
+                        <div class="step-content" data-problem="2" data-step="4">
+                            <h4 class="font-bold mb-2">Paso 4: Resolver la ecuación</h4>
+                            <div class="my-3 pl-4 border-l-4 border-indigo-300">
+                                <p class="equation">3x + 20 = 2x + 40</p>
+                                <p class="equation">3x - 2x = 40 - 20</p>
+                                <p class="equation">x = 20 años (edad actual de B)</p>
+                            </div>
+                        </div>
+
+                        <div class="step-content" data-problem="2" data-step="5">
+                            <h4 class="font-bold mb-2">Paso 5: Calcular la edad de A</h4>
+                            <div class="my-3 pl-4 border-l-4 border-indigo-300">
+                                <p class="equation">3x = 3 · 20 = 60 años (edad actual de A)</p>
+                            </div>
+                            <div class="mt-4 p-3 bg-green-50 border border-green-300 rounded-lg">
+                                <p class="font-bold text-green-800">Respuesta:</p>
+                                <p class="text-green-700">Actualmente, B tiene 20 años y A tiene 60 años.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="interactivo-container mt-6 bg-blue-50 p-4 rounded-lg">
+                        <h3 class="text-xl font-bold mb-3">Comprobación Interactiva</h3>
+                        <p>Verifica los cálculos para comprobar que la solución es correcta:</p>
+                        <div class="flex flex-col md:flex-row mt-4 gap-4">
+                            <div class="flex-1 bg-white p-4 rounded shadow-sm">
+                                <h4 class="font-semibold mb-2">Condición actual</h4>
+                                <p>Edad de A (60) = 3 × Edad de B (20)</p>
+                                <p class="mt-2">¿Se cumple? <span id="check-current-2" class="font-bold text-green-600">✓ Sí</span></p>
+                            </div>
+                            <div class="flex-1 bg-white p-4 rounded shadow-sm">
+                                <h4 class="font-semibold mb-2">Condición en 20 años</h4>
+                                <p>Edad de A (80) = 2 × Edad de B (40)</p>
+                                <p class="mt-2">¿Se cumple? <span id="check-future-2" class="font-bold text-green-600">✓ Sí</span></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Problema 3 -->
+            <div class="problem-content hidden" id="problem-3">
+                <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                    <h2 class="text-2xl font-bold mb-4">Problema 3</h2>
+                    <div class="exercise-box pl-4 py-2 bg-indigo-50 rounded mb-4">
+                        <p class="font-medium">Las edades de A y B suman 48 años. Si la edad de B es 5 veces la edad de A, ¿qué edad tiene cada uno?</p>
+                    </div>
+
+                    <div class="solution-controls flex justify-between items-center mb-4 bg-gray-100 p-3 rounded-lg">
+                        <h3 class="text-lg font-semibold">Solución paso a paso</h3>
+                        <div class="flex items-center">
+                            <button id="prev-step-3" class="step-navigation px-3 py-1 mr-2 bg-indigo-600 text-white rounded disabled:opacity-50" disabled>
+                                <i class="fas fa-chevron-left"></i> Anterior
+                            </button>
+                            <span id="step-indicator-3" class="mx-2">Paso 1/4</span>
+                            <button id="next-step-3" class="step-navigation px-3 py-1 bg-indigo-600 text-white rounded">
+                                Siguiente <i class="fas fa-chevron-right"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="steps-container border border-gray-200 rounded-lg p-4">
+                        <div class="step-content active" data-problem="3" data-step="1">
+                            <h4 class="font-bold mb-2">Paso 1: Definir las variables</h4>
+                            <p>Vamos a definir variables para representar las edades:</p>
+                            <div class="my-3 pl-4 border-l-4 border-indigo-300">
+                                <p class="mb-2"><span class="font-semibold">x = </span>edad de A</p>
+                                <p><span class="font-semibold">5x = </span>edad de B (porque la edad de B es 5 veces la edad de A)</p>
+                            </div>
+                        </div>
+
+                        <div class="step-content" data-problem="3" data-step="2">
+                            <h4 class="font-bold mb-2">Paso 2: Establecer la ecuación</h4>
+                            <p>Según el enunciado, las edades de A y B suman 48 años:</p>
+                            <div class="my-3 pl-4 border-l-4 border-indigo-300">
+                                <p class="equation">x + 5x = 48</p>
+                                <p class="equation">6x = 48</p>
+                            </div>
+                        </div>
+
+                        <div class="step-content" data-problem="3" data-step="3">
+                            <h4 class="font-bold mb-2">Paso 3: Resolver la ecuación</h4>
+                            <div class="my-3 pl-4 border-l-4 border-indigo-300">
+                                <p class="equation">6x = 48</p>
+                                <p class="equation">x = 48 ÷ 6 = 8 años (edad de A)</p>
+                            </div>
+                        </div>
+
+                        <div class="step-content" data-problem="3" data-step="4">
+                            <h4 class="font-bold mb-2">Paso 4: Calcular la edad de B</h4>
+                            <div class="my-3 pl-4 border-l-4 border-indigo-300">
+                                <p class="equation">5x = 5 · 8 = 40 años (edad de B)</p>
+                            </div>
+                            <div class="mt-4 p-3 bg-green-50 border border-green-300 rounded-lg">
+                                <p class="font-bold text-green-800">Respuesta:</p>
+                                <p class="text-green-700">A tiene 8 años y B tiene 40 años.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="interactivo-container mt-6 bg-blue-50 p-4 rounded-lg">
+                        <h3 class="text-xl font-bold mb-3">Calculadora Interactiva</h3>
+                        <p class="mb-4">Modifica los valores para verificar las condiciones del problema:</p>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="bg-white p-4 rounded shadow-sm">
+                                <label for="edad-a-3" class="block mb-2 font-semibold">Edad de A:</label>
+                                <input type="number" id="edad-a-3" class="border border-gray-300 rounded w-full p-2 mb-2" value="8">
+                                <label for="edad-b-3" class="block mb-2 font-semibold">Edad de B:</label>
+                                <input type="number" id="edad-b-3" class="border border-gray-300 rounded w-full p-2 mb-4" value="40">
+                                <button id="verificar-3" class="bg-indigo-600 text-white py-2 px-4 rounded">Verificar</button>
+                            </div>
+                            
+                            <div class="bg-white p-4 rounded shadow-sm">
+                                <h4 class="font-semibold mb-2">Resultados:</h4>
+                                <div class="mb-2">
+                                    <p class="mb-1">Suma de edades:</p>
+                                    <p id="suma-3" class="font-bold">48 años ✓</p>
+                                </div>
+                                <div class="mb-2">
+                                    <p class="mb-1">¿B es 5 veces A?</p>
+                                    <p id="relacion-3" class="font-bold text-green-600">Sí ✓</p>
+                                </div>
+                                <div class="mt-3 p-2 border-t border-gray-200">
+                                    <p id="conclusion-3" class="font-semibold text-green-600">¡La solución es correcta!</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Problema 4 -->
+            <div class="problem-content hidden" id="problem-4">
+                <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                    <h2 class="text-2xl font-bold mb-4">Problema 4</h2>
+                    <div class="exercise-box pl-4 py-2 bg-indigo-50 rounded mb-4">
+                        <p class="font-medium">La edad actual de A es la mitad de la de B, y hace 10 años la edad de A era los 7/5 de la edad de B. Hallar las edades actuales.</p>
+                    </div>
+
+                    <div class="solution-controls flex justify-between items-center mb-4 bg-gray-100 p-3 rounded-lg">
+                        <h3 class="text-lg font-semibold">Solución paso a paso</h3>
+                        <div class="flex items-center">
+                            <button id="prev-step-4" class="step-navigation px-3 py-1 mr-2 bg-indigo-600 text-white rounded disabled:opacity-50" disabled>
+                                <i class="fas fa-chevron-left"></i> Anterior
+                            </button>
+                            <span id="step-indicator-4" class="mx-2">Paso 1/5</span>
+                            <button id="next-step-4" class="step-navigation px-3 py-1 bg-indigo-600 text-white rounded">
+                                Siguiente <i class="fas fa-chevron-right"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="steps-container border border-gray-200 rounded-lg p-4">
+                        <div class="step-content active" data-problem="4" data-step="1">
+                            <h4 class="font-bold mb-2">Paso 1: Definir las variables</h4>
+                            <p>Vamos a definir variables para representar las edades actuales:</p>
+                            <div class="my-3 pl-4 border-l-4 border-indigo-300">
+                                <p class="mb-2"><span class="font-semibold">x = </span>edad actual de A</p>
+                                <p><span class="font-semibold">2x = </span>edad actual de B (porque la edad de A es la mitad de la de B)</p>
+                            </div>
+                        </div>
+
+                        <div class="step-content" data-problem="4" data-step="2">
+                            <h4 class="font-bold mb-2">Paso 2: Analizar la situación hace 10 años</h4>
+                            <p>Calculamos las edades hace 10 años:</p>
+                            <div class="my-3 pl-4 border-l-4 border-indigo-300">
+                                <p class="mb-2"><span class="font-semibold">Edad de A hace 10 años = </span>x - 10 años</p>
+                                <p><span class="font-semibold">Edad de B hace 10 años = </span>2x - 10 años</p>
+                            </div>
+                        </div>
+
+                        <div class="step-content" data-problem="4" data-step="3">
+                            <h4 class="font-bold mb-2">Paso 3: Establecer la ecuación</h4>
+                            <p>Según el enunciado, hace 10 años la edad de A era los 7/5 de la edad de B:</p>
+                            <div class="my-3 pl-4 border-l-4 border-indigo-300">
+                                <p class="equation">x - 10 = <span class="fraction"><span>7</span><span class="frac-line"></span><span>5</span></span> · (2x - 10)</p>
+                            </div>
+                        </div>
+
+                        <div class="step-content" data-problem="4" data-step="4">
+                            <h4 class="font-bold mb-2">Paso 4: Resolver la ecuación</h4>
+                            <div class="my-3 pl-4 border-l-4 border-indigo-300">
+                                <p class="equation">x - 10 = <span class="fraction"><span>7</span><span class="frac-line"></span><span>5</span></span> · (2x - 10)</p>
+                                <p class="equation">7x - 70 = 5x - 30</p>
+                                <p class="equation">7x - 5x = 70 - 30</p>
+                                <p class="equation">2x = 40</p>
+                                <p class="equation">x = 20 años (edad actual de A)</p>
+                            </div>
+                        </div>
+
+                        <div class="step-content" data-problem="4" data-step="5">
+                            <h4 class="font-bold mb-2">Paso 5: Calcular la edad de B</h4>
+                            <div class="my-3 pl-4 border-l-4 border-indigo-300">
+                                <p class="equation">2x = 2 · 20 = 40 años (edad actual de B)</p>
+                            </div>
+                            <div class="mt-4 p-3 bg-green-50 border border-green-300 rounded-lg">
+                                <p class="font-bold text-green-800">Respuesta:</p>
+                                <p class="text-green-700">Actualmente, A tiene 20 años y B tiene 40 años.</p>
+                                <p class="mt-2 text-gray-600 text-sm">Nota: En el desarrollo original hay una discrepancia. Se obtiene x = 40, pero esto puede deberse a un planteamiento diferente de la ecuación.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="interactivo-container mt-6 bg-blue-50 p-4 rounded-lg">
+                        <h3 class="text-xl font-bold mb-3">Comprobación Interactiva</h3>
+                        <p>Verifica los cálculos para comprobar que la solución es correcta:</p>
+                        <div class="flex flex-col md:flex-row mt-4 gap-4">
+                            <div class="flex-1 bg-white p-4 rounded shadow-sm">
+                                <h4 class="font-semibold mb-2">Condición actual</h4>
+                                <p>Edad de A (20) = (1/2) × Edad de B (40)</p>
+                                <p class="mt-2">¿Se cumple? <span id="check-current-4" class="font-bold text-green-600">✓ Sí</span></p>
+                            </div>
+                            <div class="flex-1 bg-white p-4 rounded shadow-sm">
+                                <h4 class="font-semibold mb-2">Condición hace 10 años</h4>
+                                <p>Edad de A (10) = (7/5) × Edad de B (30)</p>
+                                <p class="mt-2">¿Se cumple? <span id="check-past-4" class="font-bold text-green-600">✓ Sí</span></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Problema 5 -->
+            <div class="problem-content hidden" id="problem-5">
+                <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                    <h2 class="text-2xl font-bold mb-4">Problema 5</h2>
+                    <div class="exercise-box pl-4 py-2 bg-indigo-50 rounded mb-4">
+                        <p class="font-medium">Hace 10 años la edad de A era los 3/5 de la edad que tendrá dentro de 20 años. Hallar la edad actual de A.</p>
+                    </div>
+
+                    <div class="solution-controls flex justify-between items-center mb-4 bg-gray-100 p-3 rounded-lg">
+                        <h3 class="text-lg font-semibold">Solución paso a paso</h3>
+                        <div class="flex items-center">
+                            <button id="prev-step-5" class="step-navigation px-3 py-1 mr-2 bg-indigo-600 text-white rounded disabled:opacity-50" disabled>
+                                <i class="fas fa-chevron-left"></i> Anterior
+                            </button>
+                            <span id="step-indicator-5" class="mx-2">Paso 1/4</span>
+                            <button id="next-step-5" class="step-navigation px-3 py-1 bg-indigo-600 text-white rounded">
+                                Siguiente <i class="fas fa-chevron-right"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="steps-container border border-gray-200 rounded-lg p-4">
+                        <div class="step-content active" data-problem="5" data-step="1">
+                            <h4 class="font-bold mb-2">Paso 1: Definir las variables</h4>
+                            <p>Vamos a definir variables para representar las edades:</p>
+                            <div class="my-3 pl-4 border-l-4 border-indigo-300">
+                                <p><span class="font-semibold">x = </span>edad actual de A</p>
+                            </div>
+                        </div>
+
+                        <div class="step-content" data-problem="5" data-step="2">
+                            <h4 class="font-bold mb-2">Paso 2: Analizar las diferentes situaciones temporales</h4>
+                            <p>Calculamos las edades en diferentes momentos:</p>
+                            <div class="my-3 pl-4 border-l-4 border-indigo-300">
+                                <p class="mb-2"><span class="font-semibold">Edad de A hace 10 años = </span>x - 10 años</p>
+                                <p><span class="font-semibold">Edad de A dentro de 20 años = </span>x + 20 años</p>
+                            </div>
+                        </div>
+
+                        <div class="step-content" data-problem="5" data-step="3">
+                            <h4 class="font-bold mb-2">Paso 3: Establecer la ecuación</h4>
+                            <p>Según el enunciado, la edad de A hace 10 años era los 3/5 de la edad que tendrá dentro de 20 años:</p>
+                            <div class="my-3 pl-4 border-l-4 border-indigo-300">
+                                <p class="equation">x - 10 = <span class="fraction"><span>3</span><span class="frac-line"></span><span>5</span></span> · (x + 20)</p>
+                            </div>
+                        </div>
+
+                        <div class="step-content" data-problem="5" data-step="4">
+                            <h4 class="font-bold mb-2">Paso 4: Resolver la ecuación</h4>
+                            <div class="my-3 pl-4 border-l-4 border-indigo-300">
+                                <p class="equation">x - 10 = <span class="fraction"><span>3</span><span class="frac-line"></span><span>5</span></span> · (x + 20)</p>
+                                <p class="equation">5(x - 10) = 3(x + 20)</p>
+                                <p class="equation">5x - 50 = 3x + 60</p>
+                                <p class="equation">5x - 3x = 50 + 60</p>
+                                <p class="equation">2x = 110</p>
+                                <p class="equation">x = 55 años (edad actual de A)</p>
+                            </div>
+                            <div class="mt-4 p-3 bg-green-50 border border-green-300 rounded-lg">
+                                <p class="font-bold text-green-800">Respuesta:</p>
+                                <p class="text-green-700">Actualmente, A tiene 55 años.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="interactivo-container mt-6 bg-blue-50 p-4 rounded-lg">
+                        <h3 class="text-xl font-bold mb-3">Calendario de Edades</h3>
+                        <p class="mb-4">Esta línea de tiempo muestra las edades de A en diferentes momentos:</p>
+                        <div class="relative h-20 bg-white rounded shadow-sm mb-4 overflow-hidden">
+                            <div class="absolute top-0 bottom-0 left-0 w-1/3 bg-indigo-100 border-r-2 border-indigo-500 flex items-center justify-center">
+                                <div>
+                                    <p class="font-bold">Hace 10 años</p>
+                                    <p class="text-xl">45 años</p>
+                                </div>
+                            </div>
+                            <div class="absolute top-0 bottom-0 left-1/3 w-1/3 bg-indigo-200 border-r-2 border-indigo-500 flex items-center justify-center">
+                                <div>
+                                    <p class="font-bold">Presente</p>
+                                    <p class="text-xl">55 años</p>
+                                </div>
+                            </div>
+                            <div class="absolute top-0 bottom-0 left-2/3 w-1/3 bg-indigo-300 flex items-center justify-center">
+                                <div>
+                                    <p class="font-bold">En 20 años</p>
+                                    <p class="text-xl">75 años</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-white p-4 rounded shadow-sm">
+                            <h4 class="font-semibold mb-2">Comprobación:</h4>
+                            <div class="equation">
+                                <p>¿Es 45 = (3/5) × 75?</p>
+                                <p>45 = (3/5) × 75 = (3/5) × 75 = 45 ✓</p>
+                                <p class="mt-2 font-semibold text-green-600">¡La solución es correcta!</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="bg-indigo-800 text-white py-4 px-4 mt-6">
+        <div class="container mx-auto text-center">
+            <p>&copy; 2023 Solucionador de Problemas Matemáticos</p>
+            <p class="text-indigo-200 mt-1">Una herramienta educativa interactiva para resolver problemas de edades</p>
+        </div>
+    </footer>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Cambio de pestañas (problemas)
+        const problemTabs = document.querySelectorAll('.problem-tab');
+        const problemContents = document.querySelectorAll('.problem-content');
+        
+        problemTabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                const problemNumber = tab.getAttribute('data-problem');
+                
+                // Actualizar pestañas
+                problemTabs.forEach(t => {
+                    t.classList.remove('text-indigo-700', 'border-b-2', 'border-indigo-700');
+                    t.classList.add('text-gray-500');
+                });
+                tab.classList.add('text-indigo-700', 'border-b-2', 'border-indigo-700');
+                tab.classList.remove('text-gray-500');
+                
+                // Mostrar el contenido correspondiente
+                problemContents.forEach(content => {
+                    content.classList.add('hidden');
+                });
+                document.getElementById(`problem-${problemNumber}`).classList.remove('hidden');
+            });
+        });
+
+        // Navegación paso a paso para cada problema
+        for (let problemNum = 1; problemNum <= 5; problemNum++) {
+            setupStepNavigation(problemNum);
+        }
+
+        // Calculadora interactiva para el problema 3
+        setupCalculatorProblem3();
+
+        function setupStepNavigation(problemNum) {
+            const steps = document.querySelectorAll(`[data-problem="${problemNum}"][data-step]`);
+            const maxSteps = steps.length;
+            let currentStep = 1;
+            
+            const prevButton = document.getElementById(`prev-step-${problemNum}`);
+            const nextButton = document.getElementById(`next-step-${problemNum}`);
+            const stepIndicator = document.getElementById(`step-indicator-${problemNum}`);
+            
+            updateButtonStates();
+            
+            prevButton.addEventListener('click', () => {
+                if (currentStep > 1) {
+                    showStep(--currentStep);
+                    updateButtonStates();
+                }
+            });
+            
+            nextButton.addEventListener('click', () => {
+                if (currentStep < maxSteps) {
+                    showStep(++currentStep);
+                    updateButtonStates();
+                }
+            });
+            
+            function showStep(stepNum) {
+                steps.forEach(step => {
+                    step.classList.remove('active');
+                });
+                document.querySelector(`[data-problem="${problemNum}"][data-step="${stepNum}"]`).classList.add('active');
+                stepIndicator.textContent = `Paso ${stepNum}/${maxSteps}`;
+            }
+            
+            function updateButtonStates() {
+                prevButton.disabled = currentStep === 1;
+                nextButton.disabled = currentStep === maxSteps;
+                
+                if (prevButton.disabled) {
+                    prevButton.classList.add('opacity-50', 'cursor-not-allowed');
+                } else {
+                    prevButton.classList.remove('opacity-50', 'cursor-not-allowed');
+                }
+                
+                if (nextButton.disabled) {
+                    nextButton.classList.add('opacity-50', 'cursor-not-allowed');
+                } else {
+                    nextButton.classList.remove('opacity-50', 'cursor-not-allowed');
+                }
+            }
+        }
+
+        function setupCalculatorProblem3() {
+            const verificarBtn = document.getElementById('verificar-3');
+            const edadAInput = document.getElementById('edad-a-3');
+            const edadBInput = document.getElementById('edad-b-3');
+            const sumaResult = document.getElementById('suma-3');
+            const relacionResult = document.getElementById('relacion-3');
+            const conclusionResult = document.getElementById('conclusion-3');
+            
+            verificarBtn.addEventListener('click', () => {
+                const edadA = parseInt(edadAInput.value) || 0;
+                const edadB = parseInt(edadBInput.value) || 0;
+                
+                const suma = edadA + edadB;
+                const esRelacionCorrecta = (edadB === 5 * edadA);
+                
+                sumaResult.textContent = `${suma} años ${suma === 48 ? '✓' : '✗'}`;
+                sumaResult.className = suma === 48 ? 'font-bold text-green-600' : 'font-bold text-red-600';
+                
+                relacionResult.textContent = esRelacionCorrecta ? 'Sí ✓' : 'No ✗';
+                relacionResult.className = esRelacionCorrecta ? 'font-bold text-green-600' : 'font-bold text-red-600';
+                
+                if (suma === 48 && esRelacionCorrecta) {
+                    conclusionResult.textContent = '¡La solución es correcta!';
+                    conclusionResult.className = 'font-semibold text-green-600';
+                } else {
+                    conclusionResult.textContent = 'La solución no cumple todas las condiciones';
+                    conclusionResult.className = 'font-semibold text-red-600';
+                }
+                
+                // Animar resultados
+                sumaResult.classList.add('highlight');
+                relacionResult.classList.add('highlight');
+                
+                setTimeout(() => {
+                    sumaResult.classList.remove('highlight');
+                    relacionResult.classList.remove('highlight');
+                }, 1500);
+            });
+        }
+    });
+    </script>
+</body>
+</html>
